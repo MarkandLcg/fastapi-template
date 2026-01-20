@@ -12,17 +12,30 @@ def custom_generate_unique_id(route: APIRoute) -> str:
     return f"{route.tags[0]}-{route.name}"
 
 
+# @asynccontextmanager
+# async def lifespan(app: FastAPI):
+#     """应用生命周期管理"""
+#     # 应用启动时执行
+#     print("应用启动中...")
+#     create_tables()  # 调用同步函数
+#     print("应用启动完成")
+#     yield
+#     # 应用关闭时执行
+#     print("应用关闭中...")
+#     shutdown_db()  # 调用同步函数
+#     print("应用关闭完成")
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """应用生命周期管理"""
     # 应用启动时执行
     print("应用启动中...")
-    create_tables()  # 调用同步函数
+    await create_tables()  # 调用异步函数
     print("应用启动完成")
     yield
     # 应用关闭时执行
     print("应用关闭中...")
-    shutdown_db()  # 调用同步函数
+    await shutdown_db()  # 调用异步函数
     print("应用关闭完成")
 
 

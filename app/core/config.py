@@ -95,11 +95,17 @@ class Settings(BaseSettings):
     MYSQL_PASSWORD: str = ""
     MYSQL_DB: str = ""
 
+    # @computed_field  # type: ignore[prop-decorator]
+    # @property
+    # def SQLALCHEMY_DATABASE_URI_MYSQL(self) -> str:
+    #     """生成 MySQL 数据库连接 URL"""
+    #     return f"mysql+pymysql://{self.MYSQL_USER}:{self.MYSQL_PASSWORD}@{self.MYSQL_SERVER}:{self.MYSQL_PORT}/{self.MYSQL_DB}?charset=utf8mb4"
+
     @computed_field  # type: ignore[prop-decorator]
     @property
     def SQLALCHEMY_DATABASE_URI_MYSQL(self) -> str:
-        """生成 MySQL 数据库连接 URL"""
-        return f"mysql+pymysql://{self.MYSQL_USER}:{self.MYSQL_PASSWORD}@{self.MYSQL_SERVER}:{self.MYSQL_PORT}/{self.MYSQL_DB}?charset=utf8mb4"
+        """生成 MySQL 数据库异步连接 URL"""
+        return f"mysql+aiomysql://{self.MYSQL_USER}:{self.MYSQL_PASSWORD}@{self.MYSQL_SERVER}:{self.MYSQL_PORT}/{self.MYSQL_DB}?charset=utf8mb4"
 
     @computed_field  # type: ignore[prop-decorator]
     @property

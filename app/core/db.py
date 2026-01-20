@@ -1,10 +1,21 @@
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.ext.declarative import declarative_base
-from sqlmodel import create_engine
+# from sqlmodel import create_engine
 
 from app.core.config import settings
 
 # 创建数据库引擎
-engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI_MYSQL), echo=settings.DEBUG_MYSQL)
+# engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI_MYSQL), echo=settings.DEBUG_MYSQL)
+
+# 创建异步数据库引擎
+engine = create_async_engine(str(settings.SQLALCHEMY_DATABASE_URI_MYSQL), echo=settings.DEBUG_MYSQL)
+
+# 创建异步会话工厂
+async_session_maker = async_sessionmaker(
+    engine,
+    class_=AsyncSession,
+    expire_on_commit=False
+)
 
 # 创建基础模型类
 Base = declarative_base()
@@ -13,24 +24,50 @@ Base = declarative_base()
 # 避免无关的警告，如未使用的导入、行太长等 noqa
 from app.models import users_models  # noqa
 
-def create_tables():
-    """创建数据库表
+# def create_tables():
+#     """创建数据库表
+#     检查数据库是否有表，没有则创建，有则不做处理
+#     """
+#     try:
+#         Base.metadata.create_all(bind=engine)
+#         print("数据库表检查完成: 已存在的表保持不变，不存在的表已创建")
+#     except Exception as e:
+#         print(f"数据库表创建失败: {e}")
+#         raise
+
+async def create_tables():
+    """异步创建数据库表
     检查数据库是否有表，没有则创建，有则不做处理
     """
     try:
-        Base.metadata.create_all(bind=engine)
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
         print("数据库表检查完成: 已存在的表保持不变，不存在的表已创建")
     except Exception as e:
         print(f"数据库表创建失败: {e}")
         raise
 
-def shutdown_db():
-    """关闭数据库
+# def shutdown_db():
+#     """关闭数据库
+#     删除全部会话，关闭引擎
+#     """
+#     try:
+#         # 关闭引擎，释放所有连接池资源
+#         engine.dispose()
+#         print("数据库已关闭: 所有会话已删除，引擎已关闭")
+#     except Exception as e:
+#         print(f"数据库关闭失败: {e}")
+#         raise
+    
+async def shutdown_db():
+    """异步关闭数据库
     删除全部会话，关闭引擎
     """
     try:
+        # 删除所有会话
+        await async_session_maker.close_all()
         # 关闭引擎，释放所有连接池资源
-        engine.dispose()
+        await engine.dispose()
         print("数据库已关闭: 所有会话已删除，引擎已关闭")
     except Exception as e:
         print(f"数据库关闭失败: {e}")

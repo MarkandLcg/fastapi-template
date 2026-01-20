@@ -12,8 +12,32 @@ from app.models.token_models import Token
 
 router = APIRouter(tags=["login"])
 
+# @router.post("/login/access-token")
+# def login_access_token(
+#     session: SessionDep, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
+# ) -> Token:
+#     """
+#     OAuth2 与 Jwt 登录接口，用于获取访问令牌
+#     :param session: 数据库会话依赖项
+#     :param form_data: 包含用户名和密码的表单数据
+#     :return: 包含访问令牌的Token模型
+#     """
+#     user = users_crud.authenticate(
+#         session=session, username=form_data.username, password=form_data.password
+#     )
+#     if not user:
+#         raise HTTPException(status_code=400, detail="Incorrect email or password")
+#     elif not user.status:
+#         raise HTTPException(status_code=400, detail="Inactive user")
+#     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+#     return Token(
+#         access_token=security.create_access_token(
+#             str(user.id), expires_delta=access_token_expires
+#         )
+#     )
+
 @router.post("/login/access-token")
-def login_access_token(
+async def login_access_token(
     session: SessionDep, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
 ) -> Token:
     """
@@ -22,7 +46,7 @@ def login_access_token(
     :param form_data: 包含用户名和密码的表单数据
     :return: 包含访问令牌的Token模型
     """
-    user = users_crud.authenticate(
+    user = await users_crud.authenticate(
         session=session, username=form_data.username, password=form_data.password
     )
     if not user:
